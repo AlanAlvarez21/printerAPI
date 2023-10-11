@@ -1,5 +1,4 @@
 const bodyParser = require('body-parser');
-const PORT = 8000 
 const express = require('express')
 const cors = require('cors')
 const app = express()
@@ -12,10 +11,9 @@ const swaggerSpec = swaggerJSDoc(swaggerOptions);
 const { v4: uuidv4 } = require('uuid')
 
 
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 app.use(cors())
 app.use(express.json()) // Ensure this line is before your route handlers.
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
-
 
 
 // Ruta GET para obtener la lista de usuarios
@@ -172,8 +170,8 @@ app.delete('/usuarios/:id', async (req, res) => {
  *         example: "Masculino"
  */
 
-app.listen(PORT, () => {
-  console.log(`Servidor en ejecución en el puerto ${PORT}`);
+app.listen(process.env.PORT, () => {
+  console.log(`Servidor en ejecución en el puerto ${process.env.PORT}`);
 });
 
 module.exports = app
