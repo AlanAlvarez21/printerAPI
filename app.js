@@ -175,3 +175,5 @@ app.delete('/usuarios/:id', async (req, res) => {
 app.listen(PORT, () => {
   console.log(`Servidor en ejecución en el puerto ${PORT}`);
 });
+
+module.exports = app
