@@ -4,7 +4,7 @@ const swaggerDefinition = {
       version: '1.0.0',
       description: 'API for managing users',
     },
-    host: 'localhost:8000', // Set this to your actual host and port
+    host: 'localhost:8080', // Set this to your actual host and port
     basePath: '/',
   };
   
