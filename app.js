@@ -1,6 +1,6 @@
 const bodyParser = require('body-parser');
 const express = require('express')
-const cors = require('cors')
+// const cors = require('cors')
 const app = express()
 const pool = require('./db')
 const swaggerJSDoc = require('swagger-jsdoc');
@@ -12,8 +12,8 @@ const { v4: uuidv4 } = require('uuid')
 
 
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
-app.use(cors())
-app.use(express.json()) // Ensure this line is before your route handlers.
+// app.use(cors())
+app.use(express.json()) 
 
 
 // Ruta GET para obtener la lista de usuarios
