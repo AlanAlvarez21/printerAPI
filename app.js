@@ -76,6 +76,16 @@ app.post('/usuarios', async (req, res) => {
     return res.status(400).json({ error: 'El correo electrónico ya está en uso' });
   }
 
+  // Validar que la edad sea un número positivo
+  if (isNaN(edad) || edad < 0) {
+    return res.status(400).json({ error: 'La edad debe ser un número positivo' });
+  }
+
+  // Validar que nombre, correo y sexo sean strings
+  if (typeof nombre !== 'string' || typeof correo !== 'string' || typeof sexo !== 'string') {
+    return res.status(400).json({ error: 'Nombre, correo y sexo deben ser cadenas de texto' });
+  }
+
   try {
     await pool.query(
       'INSERT INTO users (name, age, gender, email, id) VALUES ($1, $2, $3, $4, $5)',
@@ -120,16 +130,25 @@ app.put('/usuarios/:id', async (req, res) => {
   const userId = req.params.id;
   const { nombre, correo, edad, sexo } = req.body;
   try {
-    await pool.query(
-      'UPDATE users SET name = $1, email = $2, age = $3, gender = $4 WHERE id = $5',
-      [nombre, correo, edad, sexo, userId]
-    );
-    res.json({ mensaje: 'Usuario actualizado con éxito' });
+    // Checa si el user existe 
+    const userExistsQuery = await pool.query('SELECT id FROM users WHERE id = $1', [userId]);
+    
+    if (userExistsQuery.rows.length === 0) {
+      res.status(404).json({ error: 'Usuario no encontrado' });
+    } else {
+      // Si el user existe, procede a actualizar la data
+      await pool.query(
+        'UPDATE users SET name = $1, email = $2, age = $3, gender = $4 WHERE id = $5',
+        [nombre, correo, edad, sexo, userId]
+      );
+      res.json({ mensaje: 'Usuario actualizado con éxito' });
+    }
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Ocurrió un error al actualizar el usuario' });
   }
 });
+
 
 // Ruta DELETE para borrar un usuario por ID
 /**
@@ -154,8 +173,14 @@ app.put('/usuarios/:id', async (req, res) => {
 app.delete('/usuarios/:id', async (req, res) => {
   const userId = req.params.id;
   try {
-    await pool.query('DELETE FROM users WHERE id = $1', [userId]);
-    res.json({ mensaje: 'Usuario eliminado con éxito' });
+    const userExists = await pool.query('SELECT id FROM users WHERE id = $1', [userId]);
+
+    if (userExists.rows.length === 0) {
+      res.status(404).json({ error: 'Usuario no encontrado' });
+    } else {
+      await pool.query('DELETE FROM users WHERE id = $1', [userId]);
+      res.json({ mensaje: 'Usuario eliminado con éxito' });
+    }
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Ocurrió un error al eliminar el usuario' });
