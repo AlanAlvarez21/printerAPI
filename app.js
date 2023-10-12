@@ -166,7 +166,7 @@ app.post('/usuarios', async (req, res) => {
  */
 app.put('/usuarios/:id', async (req, res) => {
   const userId = req.params.id;
-  const { nombre, correo, edad, sexo } = req.body;
+  const { name, email, age, gender } = req.body;
 
   // Verificar que los campos no estén vacíos
   // if (!nombre || !correo || !edad || !sexo) {
@@ -174,13 +174,15 @@ app.put('/usuarios/:id', async (req, res) => {
   // }
 
   // Verificar si el correo electrónico ya existe en la base de datos (excepto para el usuario actual)
-  const existingUser = await pool.query('SELECT id FROM users WHERE email = $1 AND id != $2', [correo, userId]);
+  const existingUser = await pool.query('SELECT id FROM users WHERE email = $1 AND id != $2', [email, userId]);
 
   if (existingUser.rows.length > 0) {
     // El correo electrónico ya existe, respondemos con un error
     return res.status(400).json({ error: 'El correo electrónico ya está en uso' });
   }
-  const edadInt = parseInt(edad);
+  const edadInt = parseInt(age);
+
+  console.log(edadInt)
 
   // Validar que la edad sea un número positivo
   if (isNaN(edadInt) || edadInt < 0) {
@@ -188,7 +190,7 @@ app.put('/usuarios/:id', async (req, res) => {
   }
 
   // Validar que nombre, correo y sexo sean strings
-  if (typeof nombre !== 'string' || typeof correo !== 'string' || typeof sexo !== 'string') {
+  if (typeof name !== 'string' || typeof email !== 'string' || typeof gender !== 'string') {
     return res.status(400).json({ error: 'Nombre, correo y sexo deben ser cadenas de texto' });
   }
 
@@ -202,7 +204,7 @@ app.put('/usuarios/:id', async (req, res) => {
       // Si el usuario existe, procede a actualizar la data
       await pool.query(
         'UPDATE users SET name = $1, email = $2, age = $3, gender = $4 WHERE id = $5',
-        [nombre, correo, edad, sexo, userId]
+        [name, email, age, gender, userId]
       );
       res.json({ mensaje: 'Usuario actualizado con éxito' });
     }
