@@ -39,6 +39,44 @@ app.get('/usuarios', async (req, res) => {
   }
 });
 
+// Ruta GET para obtener un usuario por ID
+/**
+ * @swagger
+ * /usuarios/{id}:
+ *   get:
+ *     summary: Get a user by ID
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         description: ID of the user to retrieve
+ *         required: true
+ *         type: string
+ *     responses:
+ *       200:
+ *         description: Successful response
+ *         schema:
+ *           $ref: '#/definitions/User'
+ *       404:
+ *         description: User not found
+ */
+app.get('/usuarios/:id', async (req, res) => {
+  const userId = req.params.id;
+
+  try {
+    const { rows } = await pool.query('SELECT * FROM public.users WHERE id = $1', [userId]);
+
+    if (rows.length === 0) {
+      res.status(404).json({ error: 'Usuario no encontrado' });
+    } else {
+      res.json(rows[0]);
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Ocurrió un error al obtener el usuario' });
+  }
+});
+
+
 
 // Ruta POST para crear nuevos usuarios
 /**
