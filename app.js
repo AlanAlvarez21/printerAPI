@@ -1,4 +1,3 @@
-const bodyParser = require('body-parser');
 const express = require('express')
 const cors = require('cors')
 const app = express()
@@ -62,12 +61,16 @@ app.get('/usuarios', async (req, res) => {
  */
 app.post('/usuarios', async (req, res) => {
   const id = uuidv4();
-
   const { nombre, correo, edad, sexo } = req.body;
-  
+
+  // Verificar que los campos no estén vacíos
+  if (!nombre || !correo || !edad || !sexo) {
+    return res.status(400).json({ error: 'Todos los campos son obligatorios' });
+  }
+
   // Verificar si el correo electrónico ya existe en la base de datos
   const existingUser = await pool.query('SELECT id FROM users WHERE email = $1', [correo]);
-  
+
   if (existingUser.rows.length > 0) {
     // El correo electrónico ya existe, respondemos con un error
     return res.status(400).json({ error: 'El correo electrónico ya está en uso' });
