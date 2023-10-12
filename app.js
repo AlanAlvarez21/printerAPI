@@ -167,14 +167,39 @@ app.post('/usuarios', async (req, res) => {
 app.put('/usuarios/:id', async (req, res) => {
   const userId = req.params.id;
   const { nombre, correo, edad, sexo } = req.body;
+
+  // Verificar que los campos no estén vacíos
+  // if (!nombre || !correo || !edad || !sexo) {
+  //   return res.status(400).json({ error: 'Todos los campos son obligatorios' });
+  // }
+
+  // Verificar si el correo electrónico ya existe en la base de datos (excepto para el usuario actual)
+  const existingUser = await pool.query('SELECT id FROM users WHERE email = $1 AND id != $2', [correo, userId]);
+
+  if (existingUser.rows.length > 0) {
+    // El correo electrónico ya existe, respondemos con un error
+    return res.status(400).json({ error: 'El correo electrónico ya está en uso' });
+  }
+  const edadInt = parseInt(edad);
+
+  // Validar que la edad sea un número positivo
+  if (isNaN(edadInt) || edadInt < 0) {
+    return res.status(400).json({ error: 'La edad debe ser un número positivo' });
+  }
+
+  // Validar que nombre, correo y sexo sean strings
+  if (typeof nombre !== 'string' || typeof correo !== 'string' || typeof sexo !== 'string') {
+    return res.status(400).json({ error: 'Nombre, correo y sexo deben ser cadenas de texto' });
+  }
+
   try {
-    // Checa si el user existe 
+    // Checa si el usuario existe
     const userExistsQuery = await pool.query('SELECT id FROM users WHERE id = $1', [userId]);
-    
+
     if (userExistsQuery.rows.length === 0) {
       res.status(404).json({ error: 'Usuario no encontrado' });
     } else {
-      // Si el user existe, procede a actualizar la data
+      // Si el usuario existe, procede a actualizar la data
       await pool.query(
         'UPDATE users SET name = $1, email = $2, age = $3, gender = $4 WHERE id = $5',
         [nombre, correo, edad, sexo, userId]
@@ -186,6 +211,7 @@ app.put('/usuarios/:id', async (req, res) => {
     res.status(500).json({ error: 'Ocurrió un error al actualizar el usuario' });
   }
 });
+
 
 
 // Ruta DELETE para borrar un usuario por ID
