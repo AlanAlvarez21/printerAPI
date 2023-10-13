@@ -99,15 +99,17 @@ app.get('/usuarios/:id', async (req, res) => {
  */
 app.post('/usuarios', async (req, res) => {
   const id = uuidv4();
-  const { nombre, correo, edad, sexo } = req.body;
+  const { name, email, age, gender } = req.body;
+
+  console.log(req.body)
 
   // Verificar que los campos no estén vacíos
-  if (!nombre || !correo || !edad || !sexo) {
+  if (!name || !email || !age || !gender) {
     return res.status(400).json({ error: 'Todos los campos son obligatorios' });
   }
 
   // Verificar si el correo electrónico ya existe en la base de datos
-  const existingUser = await pool.query('SELECT id FROM users WHERE email = $1', [correo]);
+  const existingUser = await pool.query('SELECT id FROM users WHERE email = $1', [email]);
 
   if (existingUser.rows.length > 0) {
     // El correo electrónico ya existe, respondemos con un error
@@ -115,19 +117,19 @@ app.post('/usuarios', async (req, res) => {
   }
 
   // Validar que la edad sea un número positivo
-  if (isNaN(edad) || edad < 0) {
+  if (isNaN(age) || age < 0) {
     return res.status(400).json({ error: 'La edad debe ser un número positivo' });
   }
 
   // Validar que nombre, correo y sexo sean strings
-  if (typeof nombre !== 'string' || typeof correo !== 'string' || typeof sexo !== 'string') {
+  if (typeof name !== 'string' || typeof email !== 'string' || typeof gender !== 'string') {
     return res.status(400).json({ error: 'Nombre, correo y sexo deben ser cadenas de texto' });
   }
 
   try {
     await pool.query(
       'INSERT INTO users (name, age, gender, email, id) VALUES ($1, $2, $3, $4, $5)',
-      [nombre, edad, sexo, correo, id]
+      [name, age, gender, email, id]
     );
     res.status(201).json({ mensaje: 'Usuario creado con éxito' });
   } catch (error) {
@@ -169,9 +171,9 @@ app.put('/usuarios/:id', async (req, res) => {
   const { name, email, age, gender } = req.body;
 
   // Verificar que los campos no estén vacíos
-  // if (!nombre || !correo || !edad || !sexo) {
-  //   return res.status(400).json({ error: 'Todos los campos son obligatorios' });
-  // }
+  if (!name || !email || !age || !gender) {
+    return res.status(400).json({ error: 'Todos los campos son obligatorios' });
+  }
 
   // Verificar si el correo electrónico ya existe en la base de datos (excepto para el usuario actual)
   const existingUser = await pool.query('SELECT id FROM users WHERE email = $1 AND id != $2', [email, userId]);
