@@ -99,14 +99,14 @@ app.get('/usuarios/:id', async (req, res) => {
  */
 app.post('/usuarios', async (req, res) => {
   const id = uuidv4();
-  const { name, email, age, gender } = req.body;
+  const { nombre: name, correo: email, edad: age, sexo: gender } = req.body;
 
   console.log(req.body)
 
   // Verificar que los campos no estén vacíos
-  if (!name || !email || !age || !gender) {
-    return res.status(400).json({ error: 'Todos los campos son obligatorios' });
-  }
+  // if (!name || !email || !age || !gender) {
+  //   return res.status(400).json({ error: 'Todos los campos son obligatorios' });
+  // }
 
   // Verificar si el correo electrónico ya existe en la base de datos
   const existingUser = await pool.query('SELECT id FROM users WHERE email = $1', [email]);
@@ -115,9 +115,10 @@ app.post('/usuarios', async (req, res) => {
     // El correo electrónico ya existe, respondemos con un error
     return res.status(400).json({ error: 'El correo electrónico ya está en uso' });
   }
+  const edadInt = parseInt(age);
 
   // Validar que la edad sea un número positivo
-  if (isNaN(age) || age < 0) {
+  if (isNaN(edadInt) || edadInt < 0) {
     return res.status(400).json({ error: 'La edad debe ser un número positivo' });
   }
 
@@ -183,8 +184,6 @@ app.put('/usuarios/:id', async (req, res) => {
     return res.status(400).json({ error: 'El correo electrónico ya está en uso' });
   }
   const edadInt = parseInt(age);
-
-  console.log(edadInt)
 
   // Validar que la edad sea un número positivo
   if (isNaN(edadInt) || edadInt < 0) {
