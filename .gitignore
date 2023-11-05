@@ -5,6 +5,8 @@
 /.pnp
 .pnp.js
 
+.temp.zpl
+
 # testing
 /coverage
 
